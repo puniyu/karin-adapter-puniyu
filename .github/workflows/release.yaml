@@ -1,0 +1,78 @@
+name: 发布发行版
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+  id-token: write
+  packages: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    outputs:
+      releases_created: ${{ steps.release-please.outputs.releases_created }}
+    steps:
+      - name: 获取token
+        uses: actions/create-github-app-token@29824e69f54612133e76f7eaac726eef6c875baf # v2.2.1
+        id: app-token
+        with:
+          app-id: ${{ secrets.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}}
+
+      - name: 运行 release-please-action
+        id: release-please
+        uses: googleapis/release-please-action@16a9c90856f42705d54a6fda1823352bdc62cf38 # v4.4.0
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+          config-file: .release-please-config.json
+          manifest-file: .release-please-manifest.json
+
+  build:
+    needs: [release]
+    if: needs.release.outputs.releases_created == 'true'
+    uses: ./.github/workflows/build.yaml
+
+  publish-to-github:
+    runs-on: ubuntu-latest
+    needs: [release, build]
+    if: needs.release.outputs.releases_created == 'true'
+    steps:
+      - name: 导入构建产物
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        with:
+          name: adapter
+          path: ./
+
+      - name: 发布到 GitHub Packages
+        id: publish-to-github
+        uses: JS-DevTools/npm-publish@7f8fe47b3bea1be0c3aec2b717c5ec1f3e03410b # v4.1.1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          registry: https://npm.pkg.github.com
+          access: public
+          provenance: true
+
+  publish-to-npm:
+    runs-on: ubuntu-latest
+    needs: [release, build]
+    if: needs.release.outputs.releases_created == 'true'
+    steps:
+      - name: 导入构建产物
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        with:
+          name: adapter
+          path: ./
+
+      - name: 发布到 NPM
+        id: publish-to-npm
+        uses: JS-DevTools/npm-publish@7f8fe47b3bea1be0c3aec2b717c5ec1f3e03410b # v4.1.1
+        with:
+          token: ${{ secrets.NPM_TOKEN }}
+          registry: https://registry.npmjs.org/
+          access: public
+          provenance: true

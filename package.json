@@ -1,0 +1,74 @@
+{
+  "name": "@puniyu/karin-adapter-puniyu",
+  "version": "1.0.1",
+  "description": "GsCore adapter for karin",
+  "homepage": "https://github.com/puniyu/karin-adapter-puniyu",
+  "bugs": {
+    "url": "https://github.com/puniyu/karin-adapter-puniyu/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/puniyu/karin-adapter-puniyu.git"
+  },
+  "license": "GPL-3.0-only",
+  "author": "puniyu",
+  "type": "module",
+  "main": "lib/index.js",
+  "files": [
+    "config/",
+    "lib/",
+    "LICENSE",
+    "package.json",
+    "README.md",
+    "CHANGELOG.md"
+  ],
+  "scripts": {
+    "app": "node --import tsx src/app.ts",
+    "build": "tsc --noEmit && tsdown",
+    "dev": "cross-env EBV_FILE=\"development.env\" node --import tsx src/app.ts",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "pub": "npm publish --access public",
+    "sort": "sort-package-json",
+    "watch": "cross-env EBV_FILE=\"development.env\" tsx watch --include \"src/**/*.ts\" src/app.ts"
+  },
+  "devDependencies": {
+    "@prettier/plugin-oxc": "^0.1.0",
+    "@types/express": "^5.0.5",
+    "@types/node": "^24.0.0",
+    "cross-env": "^10.0.0",
+    "node-karin": "^1.14.1",
+    "oxlint": "^1.26.0",
+    "prettier": "^3.6.2",
+    "tsc-alias": "1.8.16",
+    "tsdown": "^0.18.0",
+    "tsx": "^4.19.4",
+    "typescript": "^5.8.3"
+  },
+  "karin": {
+    "main": "src/index.ts",
+    "web": "./lib/web.config.js",
+    "ts-web": "./src/web.config.ts",
+    "apps": [
+      "lib/apps"
+    ],
+    "ts-apps": [
+      "src/apps"
+    ],
+    "static": [
+      "resources"
+    ],
+    "files": [
+      "config",
+      "data",
+      "resources"
+    ],
+    "engines": {
+      "karin": ">=1.9.1"
+    }
+  },
+  "packageManager": "pnpm@10.23.0",
+  "dependencies": {
+    "@puniyu/protocol": "^0.2.4"
+  }
+}
